@@ -6,7 +6,7 @@ use crossterm::{
 
 use ratatui::{
     backend::CrosstermBackend,
-    widgets::{Block, Borders, Paragraph},
+    widgets::{Block, Paragraph},
     Terminal,
 };
 
@@ -15,7 +15,6 @@ use std::{
     io::stdout,
     fs,
 };
-
 mod cli;
 use cli::Cli;
 use clap::Parser;
@@ -26,7 +25,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let file_path  = &cli.file.into_os_string().into_string().unwrap();
 
-    let mut file_contents = String::new();
+    let mut file_contents: String = fs::read_to_string(file_path)?;
 
     enable_raw_mode()?;
     let mut stdout = stdout();
@@ -40,7 +39,6 @@ fn main() -> Result<(), Box<dyn Error>> {
             let text = Paragraph::new(file_contents.as_str())
                 .block(
                     Block::default()
-                        .borders(Borders::NONE)
                 );
             
             frame.render_widget(text, frame.area());
@@ -60,7 +58,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                         file_contents.pop();
                     }
                     KeyCode::Enter => {
-                        file_contents.push_str("\n");
+                        file_contents.push('\n');
                     }
 
                     KeyCode::Char(c) => {
