@@ -55,10 +55,17 @@ fn main() -> Result<(), Box<dyn Error>> {
                     KeyCode::Char('q') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                         break; 
                     }
-                    
+
+                    KeyCode::Backspace => {
+                        file_contents.pop();
+                    }
+                    KeyCode::Enter => {
+                        file_contents.push_str("\n");
+                    }
+
                     KeyCode::Char(c) => {
-                                file_contents.push(c); // Просто добавляем нажатый символ в конец строки
-                            }
+                        file_contents.push(c); // Просто добавляем нажатый символ в конец строки
+                    }
 
                     _ => {}
                 }
