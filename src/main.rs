@@ -15,17 +15,24 @@ use std::{
     io::stdout,
     fs,
 };
+
 mod cli;
 use cli::Cli;
 use clap::Parser;
 
-fn main() -> Result<(), Box<dyn Error>> {
+use ropey::Rope;
+
+fn main() -> Result<(), Box<dyn Error>> { 
 
     let cli = Cli::parse();
 
-    let file_path  = &cli.file.into_os_string().into_string().unwrap();
+    let file_path:          &String = &cli.file.into_os_string().into_string().unwrap();
 
-    let mut file_contents: String = fs::read_to_string(file_path)?;
+    let mut file_contents:  String  = fs::read_to_string(file_path)?;
+    let mut file_contents_rope: Rope = Rope::from_str(&file_contents);
+    let mut file_contents_len: usize = file_contents_rope.len_chars();
+
+    let mut current_pos:   usize    = file_contents_len;
 
     enable_raw_mode()?;
     let mut stdout = stdout();
@@ -55,18 +62,36 @@ fn main() -> Result<(), Box<dyn Error>> {
                     }
 
                     KeyCode::Backspace => {
-                        file_contents.pop();
+                        if current_pos > 0 {
+                            file_contents.remove(current_pos-1);
+                            current_pos -= 1;
+                        }
                     }
                     KeyCode::Enter => {
                         file_contents.push('\n');
                     }
+                    KeyCode::Left => {
+                        current_pos -= 1;
+                    }
+
+                    KeyCode::Right => {
+                        if current_pos >= file_contents_len {
+                            current_pos = file_contents_len;
+                        }
+                        else {
+                            current_pos += 1;
+                        }
+                    }
 
                     KeyCode::Char(c) => {
-                        file_contents.push(c); // Просто добавляем нажатый символ в конец строки
+                        file_contents.push(c);
                     }
 
                     _ => {}
                 }
+
+                file_contents_rope = Rope::from_str(&file_contents);
+                file_contents_len  = file_contents_rope.len_chars();
         }
     }
 
